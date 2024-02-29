@@ -676,7 +676,7 @@ Open manipulator X의 Hardware Specification은 다음과 같다.
 ![matlab](https://github.com/jjangujjangu/open-manipulator-X/assets/158059339/0daa482d-81d7-42bb-bab6-58fa979d920d)
 
 
-Open Manipulator X가 4자유도 로봇이다. 따라서 원하는 x,y,z좌표로 가더라도 joint4의 관절값에 여자유도가 있기에 x,y,z 그리고 joint4 관절값 4개를 input으로 받았다. 다음 code는 그 위치로 가기위한 관절값들을 구하는 IK를 code로 구현한 것이다. 좌표가 로봇의 가동 범위 안에 있지 않는 경우 관절값이 구해지지 않고 이러한 경우는 error를 나타내도록 하였다.
+Open Manipulator X가 4자유도 로봇이다. 따라서 원하는 x,y,z좌표로 가더라도 joint4의 관절값에 여자유도가 있기에 x,y,z 그리고 joint4 관절값 4개를 input으로 받았다. 다음 code는 원하는 위치로 가기위한 관절값들을 구하는 IK를 code로 구현한 것이다. 좌표가 로봇의 가동 범위 안에 있지 않는 경우 관절값이 구해지지 않고 이러한 경우는 error를 나타내도록 하였다.
 ```bash
 def calculate_angles2(x, y, z, a4):
     try:
