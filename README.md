@@ -516,6 +516,8 @@ ros2 run tutorial_python init_and_home
 
 ```
 
+![init_and_home1](https://github.com/jjangujjangu/open-manipulator-X/assets/158059339/2d4a2671-adbe-48f1-992d-89a7b318ed47)
+
 
 https://github.com/jjangujjangu/open-manipulator-X/assets/158059339/76bdbdf2-ef04-42b2-982d-0cac33073e51
 
