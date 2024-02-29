@@ -45,8 +45,7 @@ $ cd ~/colcon_ws && colcon build --symlink-install
 ### __3.2. Hardware 구성하기__
 OpenMANIPULATOR-X를 제어하는 데 사용할 수 있는 통신 인터페이스 하드웨어 옵션은 2가지 있다. 나의 경우 OpenCR을 communication interface로 이용하였고 이를 통해 Open Manipulator와 PC와 연결하였다.
 
-
-![Alt text](OpenManipulator_opencr_setup2.png)
+![OpenManipulator_opencr_setup2](https://github.com/jjangujjangu/open-manipulator-X/assets/158059339/391c0d63-34e2-4c01-bb68-dc01f806edf2)
 
 
 [OpenCR 연결법](https://emanual.robotis.com/docs/en/platform/openmanipulator_x/quick_start_guide/) (Open Manipulator X homepage 4.quick start guide에서 4.1.4 Communication Interface 참조)
