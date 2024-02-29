@@ -223,7 +223,7 @@ colcon build --packages-select tutorial_python
 ```bash
 ros2 run open_manipulator_x_tutorial hello_ros_pub
 ```
-![Alt text](<Screenshot from 2024-02-29 15-13-52.png>)
+![Screenshot from 2024-02-29 15-13-52](https://github.com/jjangujjangu/open-manipulator-X/assets/158059339/8d2d835b-c6d8-48c7-bb8f-02e31c3e8ee9)
 
 
 ## __6. hello_ros_sub__
@@ -306,4 +306,5 @@ colcon build --packages-select tutorial_python
 ```bash
 ros2 run tutorial_python hello_ros_sub
 ```
-![Alt text](<Screenshot from 2024-02-29 15-16-00-1.png>)
+
+![Screenshot from 2024-02-29 15-16-00](https://github.com/jjangujjangu/open-manipulator-X/assets/158059339/64bb496e-8b1e-44f0-a57b-05addaee8143)
