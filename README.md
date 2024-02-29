@@ -521,4 +521,223 @@ ros2 run tutorial_python init_and_home
 
 https://github.com/jjangujjangu/open-manipulator-X/assets/158059339/76bdbdf2-ef04-42b2-982d-0cac33073e51
 
+## __8. init_and_home2__
+본 노드는 Open Manipulator X를 초기위치, 원하는 위치로 이동하는 노드를 구현해본다.
+
+### __8.1. 전체 code__
+```bash
+$ cd ~/colcon_ws/src/tutorial_python/tutorial_python
+$ gedit init_and_home_node2.py
+```
+gedit에서 script를 만든 다음 다음과 같이 코드를 작성한다.
+```bash
+import os
+from getkey import getkey
+import numpy as np
+
+
+
+import rclpy
+from rclpy.node import Node
+
+from open_manipulator_msgs.srv import SetJointPosition
+
+def calculate_angles2(x, y, z, a4):
+    try:
+        # 각각의 변수에 대한 값 계산
+        a1 = np.arctan2(y, x)
+        A = 0.03224 + 0.03276 * np.cos(a4)
+        B = -0.03276 * np.sin(a4)
+        alpha = np.arctan2(B, A)
+        if np.abs(np.arccos((x**2 + y**2 + (z - 0.077)**2 - 0.048152 - 0.031248 * np.cos(a4)) / np.sqrt(A**2 + B**2))) <= 1:
+            a3 = np.arccos((x**2 + y**2 + (z - 0.077)**2 - 0.048152 - 0.031248 * np.cos(a4)) / np.sqrt(A**2 + B**2)) + alpha - 1.385
+        else:
+            raise ValueError("Invalid input for a3")
+        a = 0.13 * np.cos(1.385) + 0.124 * np.cos(a3) + 0.126 * np.cos(a3 + a4)
+        b = 0.13 * np.sin(1.385) - 0.124 * np.sin(a3) - 0.126 * np.sin(a3 + a4)
+        beta = np.arctan2(b, a)
+        if np.abs(np.arccos(x / (np.sqrt(a**2 + b**2) * np.cos(a1)))) <= 1:
+            a21 = np.arccos(x / (np.sqrt(a**2 + b**2) * np.cos(a1))) + beta
+        else:
+            raise ValueError("Invalid input for a2")
+        a21 = -np.arccos(x / (np.sqrt(a**2 + b**2) * np.cos(a1))) + beta
+        a22 = np.arccos(x / (np.sqrt(a**2 + b**2) * np.cos(a1))) + beta
+        z1 = 0.077 - 0.126 * np.sin(a21 + a3 + a4) - 0.13 * np.sin(a21 - 1.385) - 0.124 * np.sin(a21 + a3)
+        z2 = 0.077 - 0.126 * np.sin(a22 + a3 + a4) - 0.13 * np.sin(a22 - 1.385) - 0.124 * np.sin(a22 + a3)
+        if abs(z - z1) < abs(z - z2):
+            a2 = a21
+        else:
+            a2 = a22
+
+        return a1, a2, a3
+    except Exception as e:
+        print("Error:", e)
+        print("Please enter valid values for x, y, z, and a4.")
+        x = float(input("Enter the value of x: "))
+        y = float(input("Enter the value of y: "))
+        z = float(input("Enter the value of z: "))
+        a4 = float(input("Enter the value of a4: "))
+        return calculate_angles2(x, y, z, a4)
+    
+PI = 3.14159265359
+NUM_OF_JOINT = 4
+
+class InitAndHome(Node):
+    def __init__(self):
+        self.future = None
+        super().__init__('init_and_home_node')
+        self.path_time = 3.0
+        self.client = self.create_client(SetJointPosition, 'goal_joint_space_path')
+
+        self.request = SetJointPosition.Request()
+
+        timer_period = 0.5
+        self.timer = self.create_timer(timer_period, self.timer_callback)
+
+    def timer_callback(self):
+        command = getkey()
+        self.send_command(str(command))
+
+    def set_joint_space_path(self, joint_name: list, joint_angle: list):
+        self.request.joint_position.joint_name = joint_name
+        self.request.joint_position.position = joint_angle
+        self.request.path_time = self.path_time
+
+        future = self.client.call_async(self.request)
+
+    def send_command(self, command: str):
+        if command is '1':
+            print("input : 1 \t init pose")
+            joint_name = []
+            joint_angle = []
+
+            joint_name.append('joint1')
+            joint_name.append('joint2')
+            joint_name.append('joint3')
+            joint_name.append('joint4')
+
+            joint_angle.append(0.0)
+            joint_angle.append(0.0)
+            joint_angle.append(0.0)
+            joint_angle.append(0.0)
+            self.set_joint_space_path(joint_name, joint_angle)
+        elif command is '2':
+            print("input : 2 \t action pose")
+            joint_name = []
+            joint_angle = []
+            
+            x = float(input("Enter the value of x: "))
+            y = float(input("Enter the value of y: "))
+            z = float(input("Enter the value of z: "))
+            a4 = float(input("Enter the value of a4: "))
+            
+            a1, a2, a3= calculate_angles2(x, y, z,a4)
+
+            joint_name.append('joint1')
+            joint_name.append('joint2')
+            joint_name.append('joint3')
+            joint_name.append('joint4')
+
+            joint_angle.append(a1)
+            joint_angle.append(a2)
+            joint_angle.append(a3)
+            joint_angle.append(a4)
+
+            self.set_joint_space_path(joint_name, joint_angle)
+        else:
+            print("input : %s" % command)
+
+def main(args=None):
+    rclpy.init(args=args)
+    init_and_home = InitAndHome()
+    while rclpy.ok():
+        rclpy.spin_once(init_and_home)
+
+    init_and_home.destroy_node()
+    rclpy.shutdown()
+
+
+if __name__ == '__main__':
+    main()
+```
+### 8.2. Sourcecode 설명
+Inverse Kinematics(IK)를 푸는 것이 추가된 것이기에, IK를 풀었던 과정을 적어놓았다.
+
+Open manipulator X의 Hardware Specification은 다음과 같다.
+
+![Alt text](OpenManipulator_Chain_spec_side.png)
+
+위 그림을 통해 DH parameter를 구하였고, 그 그림은 다음과 같다
+![Alt text](<Screenshot_20240229_163433_Samsung Notes.jpg>)
+
+구한 DH parameter를 바탕으로 Matlab을 통해 transformation matrix와 관절값에 따른 좌표값을 구하였고 그 결과는 다음과 같다.
+
+![Alt text](matlab.PNG)
+
+Open Manipulator X가 4자유도 로봇이다. 따라서 원하는 x,y,z좌표로 가더라도 joint4의 관절값에 여자유도가 있기에 x,y,z 그리고 joint4 관절값 4개를 input으로 받았다. 다음 code는 그 위치로 가기위한 관절값들을 구하는 IK를 code로 구현한 것이다. 좌표가 로봇의 가동 범위 안에 있지 않는 경우 관절값이 구해지지 않고 이러한 경우는 error를 나타내도록 하였다.
+```bash
+def calculate_angles2(x, y, z, a4):
+    try:
+        # 각각의 변수에 대한 값 계산
+        a1 = np.arctan2(y, x)
+        A = 0.03224 + 0.03276 * np.cos(a4)
+        B = -0.03276 * np.sin(a4)
+        alpha = np.arctan2(B, A)
+        if np.abs(np.arccos((x**2 + y**2 + (z - 0.077)**2 - 0.048152 - 0.031248 * np.cos(a4)) / np.sqrt(A**2 + B**2))) <= 1:
+            a3 = np.arccos((x**2 + y**2 + (z - 0.077)**2 - 0.048152 - 0.031248 * np.cos(a4)) / np.sqrt(A**2 + B**2)) + alpha - 1.385
+        else:
+            raise ValueError("Invalid input for a3")
+        a = 0.13 * np.cos(1.385) + 0.124 * np.cos(a3) + 0.126 * np.cos(a3 + a4)
+        b = 0.13 * np.sin(1.385) - 0.124 * np.sin(a3) - 0.126 * np.sin(a3 + a4)
+        beta = np.arctan2(b, a)
+        if np.abs(np.arccos(x / (np.sqrt(a**2 + b**2) * np.cos(a1)))) <= 1:
+            a21 = np.arccos(x / (np.sqrt(a**2 + b**2) * np.cos(a1))) + beta
+        else:
+            raise ValueError("Invalid input for a2")
+        a21 = -np.arccos(x / (np.sqrt(a**2 + b**2) * np.cos(a1))) + beta
+        a22 = np.arccos(x / (np.sqrt(a**2 + b**2) * np.cos(a1))) + beta
+        z1 = 0.077 - 0.126 * np.sin(a21 + a3 + a4) - 0.13 * np.sin(a21 - 1.385) - 0.124 * np.sin(a21 + a3)
+        z2 = 0.077 - 0.126 * np.sin(a22 + a3 + a4) - 0.13 * np.sin(a22 - 1.385) - 0.124 * np.sin(a22 + a3)
+        if abs(z - z1) < abs(z - z2):
+            a2 = a21
+        else:
+            a2 = a22
+
+        return a1, a2, a3
+    except Exception as e:
+        print("Error:", e)
+        print("Please enter valid values for x, y, z, and a4.")
+        x = float(input("Enter the value of x: "))
+        y = float(input("Enter the value of y: "))
+        z = float(input("Enter the value of z: "))
+        a4 = float(input("Enter the value of a4: "))
+        return calculate_angles2(x, y, z, a4)
+```  
+나머지 코드는 7과 동일하다.
+
+### __8.3. 구동하기__
+
+
+```bash
+# package build하기
+cd ~/colcon_ws
+colcon build --packages-select tutorial_python
+```
+마찬가지로 init_and_home_node2를 구동하기 앞서서 Open Manipulator X의 launch controller를 구동해야한다. 
+
+새로운 terminal을 열어 다음 코드를 실행시킨다. 
+```bash
+ros2 launch open_manipulator_x_controller open_manipulator_x_controller.launch.py usb_port:=/dev/ttyACM0
+```
+이후 새로운 terminal에서 다음 코드를 실행시킨 결과는 다음과 같다.
+```
+ros2 run tutorial_python init_and_home2
+
+```
+![init_and_home2](https://github.com/jjangujjangu/open-manipulator-X/assets/158059339/31435c00-2198-4cec-b012-8245da20b3ef)
+
+
+
+https://github.com/jjangujjangu/open-manipulator-X/assets/158059339/f04b3f3c-2152-4566-b68a-051ad2c718a7
+
 
