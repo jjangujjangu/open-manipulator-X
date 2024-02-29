@@ -665,14 +665,16 @@ Inverse Kinematics(IK)를 푸는 것이 추가된 것이기에, IK를 풀었던 
 
 Open manipulator X의 Hardware Specification은 다음과 같다.
 
-![Alt text](OpenManipulator_Chain_spec_side.png)
+![OpenManipulator_Chain_spec_side](https://github.com/jjangujjangu/open-manipulator-X/assets/158059339/1b3fd3a0-c425-452c-b89a-5ef2b2660bb9)
+
 
 위 그림을 통해 DH parameter를 구하였고, 그 그림은 다음과 같다
-![Alt text](<Screenshot_20240229_163433_Samsung Notes.jpg>)
+![Screenshot_20240229_163433_Samsung Notes](https://github.com/jjangujjangu/open-manipulator-X/assets/158059339/6ef7df85-58d2-4591-b49c-973771f5d353)
+
 
 구한 DH parameter를 바탕으로 Matlab을 통해 transformation matrix와 관절값에 따른 좌표값을 구하였고 그 결과는 다음과 같다.
+![matlab](https://github.com/jjangujjangu/open-manipulator-X/assets/158059339/0daa482d-81d7-42bb-bab6-58fa979d920d)
 
-![Alt text](matlab.PNG)
 
 Open Manipulator X가 4자유도 로봇이다. 따라서 원하는 x,y,z좌표로 가더라도 joint4의 관절값에 여자유도가 있기에 x,y,z 그리고 joint4 관절값 4개를 input으로 받았다. 다음 code는 그 위치로 가기위한 관절값들을 구하는 IK를 code로 구현한 것이다. 좌표가 로봇의 가동 범위 안에 있지 않는 경우 관절값이 구해지지 않고 이러한 경우는 error를 나타내도록 하였다.
 ```bash
